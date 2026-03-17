@@ -1,42 +1,66 @@
-# AI-Powered Website Audit Tool
+AI-Powered Website Audit Tool (EIGHT25MEDIA Assignment)
+This is a lightweight, AI-native web application that extracts factual metrics from a given URL and uses the Gemini 1.5 Flash (Google AI) model to generate structured, data-grounded insights and prioritized recommendations. 
 
-A lightweight, AI-native web application built for EIGHT25MEDIA that extracts factual metrics from a given URL and uses an LLM (OpenAI) to generate structured, data-grounded insights and prioritized recommendations.
+Setup & Installation Instructions 
 
-## Setup & Installation instructions
+1. Backend Setup
 
-### Prerequisites
-- Node.js installed
-- OpenAI API Key
+Navigate to the backend directory: cd backend
 
-### 1. Backend Setup
-1. Navigate to the `backend` directory: `cd backend`
-2. Install dependencies: `npm install`
-3. Create a `.env` file and add your API key:
-   `OPENAI_API_KEY=your_api_key_here`
-4. Start the server: `node server.js` (Runs on port 3001)
+Install dependencies: npm install
 
-### 2. Frontend Setup
-1. Open a new terminal and navigate to the `frontend` directory: `cd frontend`
-2. Install dependencies: `npm install`
-3. Start the Vite development server: `npm run dev`
-4. Open your browser and navigate to the provided local URL (usually `http://localhost:5173`).
+Create a .env file and add your Google AI (Gemini) API key: 
+GEMINI_API_KEY=your_google_ai_key_here
 
----
+Start the server: node server.js (The server runs on port 3001).
 
-## Architecture Overview
-To ensure a clean separation between data extraction and AI analysis, the application uses a decoupled Client-Server architecture:
-- **Frontend (React + Tailwind + Vite):** Handles the user interface, state management, and presents the separated factual data vs. AI insights cleanly.
-- **Backend (Node.js + Express):** Acts as a proxy to bypass CORS, uses `Cheerio` to extract the DOM metrics directly from the HTML payload, and orchestrates the call to the OpenAI API.
+2. Frontend Setup
 
-## AI Design Decisions
-- **JSON Mode:** Forced the LLM (`gpt-4o-mini`) to output strict JSON matching a pre-defined schema. This ensures the frontend can reliably map the AI's response to React components without manual string parsing.
-- **Prompt Injection:** The factual metrics extracted by Cheerio are stringified and injected directly into the user prompt. This grounds the AI, preventing hallucinations and ensuring recommendations are specific to the actual webpage data.
+Navigate to the frontend directory: cd frontend
 
-## Trade-offs
-- **Real-time Scraping vs. Queues:** The app scrapes the target URL synchronously while the user waits. While simple and fast for single pages, a production app would benefit from a queue system (like BullMQ) and webhooks to handle large, slow-loading pages without timing out.
-- **Cheerio vs. Puppeteer:** Used Cheerio for speed and simplicity. The trade-off is that it only parses the initial HTML payload and cannot execute JavaScript, meaning it might miss client-side rendered content (like SPAs).
+Install dependencies: npm install
 
-## What I Would Improve With More Time
-1. **Headless Browser Integration:** Implement Puppeteer or Playwright to render JavaScript and capture dynamic content, as well as take an actual screenshot of the target URL to display in the UI.
-2. **Multi-Page Crawling:** Expand the tool to accept a root domain and crawl linked pages up to a certain depth.
-3. **Advanced Metrics:** Integrate Lighthouse API for real performance metrics (LCP, CLS) instead of just DOM counting.
+Start the Vite development server: npm run dev
+
+Open your browser and navigate to http://localhost:5173.
+
+* Architecture Overview 
+
+The application uses a decoupled Client-Server architecture to ensure a clean separation between data extraction and AI analysis: 
+
+Frontend (React + Tailwind + Vite): Handles the user interface and state management, clearly separating factual data from AI-generated insights. 
+
+Backend (Node.js + Express): Acts as a proxy to bypass CORS and orchestrates the scraping and AI workflows. 
+
+Data Extraction (Cheerio): Scrapes the target URL's HTML to extract metrics such as word counts, headings, and link types. 
+
+* AI Design Decisions 
+
+Model Selection: Powered by Gemini 1.5 Flash, chosen for its high speed and efficient processing of structured data. 
+
+JSON Mode Enforcement: The system forces the model to output a strict JSON schema.  This ensures the frontend can reliably map recommendations to UI components without manual string parsing.
+
+Context Grounding: Factual metrics extracted via Cheerio (like image alt-text percentages and CTA counts) are injected directly into the prompt. This prevents hallucinations and ensures the AI provides specific, non-generic advice. 
+
+* Trade-offs 
+
+Cheerio vs. Puppeteer: Cheerio was selected for its extreme performance. While it cannot execute JavaScript for Single Page Apps (SPAs), it is highly effective for the initial DOM analysis of most marketing sites. 
+
+Synchronous Auditing: To keep the implementation simple and focused for this 24-hour scope, the audit is processed in a single request-response cycle. 
+
+* Future Improvements 
+
+Headless Browsing: Integrating Puppeteer to handle JavaScript-heavy sites and capture visual screenshots.
+
+Performance Auditing: Connecting to the Google Lighthouse API to provide technical Core Web Vitals (LCP, CLS).
+
+Multi-Page Depth: Expanding the tool to crawl a root domain and identify sitewide SEO issues. 
+
+* Deliverables 
+
+
+GitHub Repository: https://github.com/surajmalaka29/ai-website-audit. 
+
+Live Deployment: https://ai-website-audit-ten.vercel.app/. 
+
+Prompt Logs: Detailed traces of system and user prompts in PROMPTS.md.

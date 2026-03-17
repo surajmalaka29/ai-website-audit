@@ -1,59 +1,72 @@
-# AI Prompt Logs & Reasoning Traces
+AI Prompt Logs & Reasoning Traces
+This document outlines the prompt engineering strategy used for the Website Audit Tool, demonstrating how the LLM is grounded in factual metrics.
 
-## 1. System Prompt
-We defined a strict role and output constraint for the AI to ensure it grounds its insights in the factual metrics provided.
+1. System Prompt
+The system prompt establishes the AI's persona as an expert auditor and sets strict operational constraints to ensure data-driven outputs.
 
-**Prompt:**
-> "You are an expert Website Auditor for EIGHT25MEDIA. You analyze web pages and provide insights based STRICTLY on the provided factual metrics. You must output a valid JSON object."
+Prompt:
 
-## 2. User Prompt (Dynamic)
-The user prompt injects the live JSON data scraped from the requested URL by Cheerio and enforces the structure of the output.
+"You are an expert Website Auditor for EIGHT25MEDIA. You analyze web pages and provide insights based STRICTLY on the provided factual metrics. You must output a valid JSON object."
 
-**Prompt Template:**
-> "Here is the scraped data from the URL: {url}
-> Metrics: {JSON_Stringified_Metrics}
->       
-> Generate a structured analysis. Ensure your output matches exactly this JSON format:
-> {
->   "insights": [
->     { "category": "SEO Strategy", "text": "specific insight about SEO based on the metrics" },
->     { "category": "User Experience", "text": "insight about UX concerns" },
->     { "category": "Messaging", "text": "insight about clarity" }
->   ],
->   "recommendations": [
->     { "title": "Recommendation 1", "impact": "High Impact", "description": "concise, actionable advice" },
->     { "title": "Recommendation 2", "impact": "Medium Impact", "description": "concise, actionable advice" },
->     { "title": "Recommendation 3", "impact": "Low Impact", "description": "concise, actionable advice" }
->   ]
-> }
->       
-> Provide 3-5 prioritized recommendations. Tie reasoning clearly to the extracted metrics. Do not use generic advice."
+2. User Prompt Construction
+The user prompt is dynamically constructed by injecting stringified JSON data extracted from the target URL via the scraping layer.
 
-## 3. Raw Model Output Example
-Here is a raw response trace from the model (OpenAI - gpt-4o-mini) successfully adhering to the JSON schema based on the injected data:
+Template:
 
-```json
+"Here is the scraped data from the URL: [Target URL]
+Metrics: [JSON_Stringified_Metrics]
+
+Generate a structured analysis. Ensure your output matches exactly this JSON format:
+{
+"insights": [
+{ "category": "SEO Strategy", "text": "specific insight" },
+{ "category": "User Experience", "text": "specific insight" },
+{ "category": "Messaging", "text": "specific insight" }
+],
+"recommendations": [
+{ "title": "Recommendation 1", "impact": "High/Medium/Low", "description": "actionable advice" }
+]
+}
+
+Provide 3-5 prioritized recommendations. Tie reasoning clearly to the extracted metrics. Do not use generic advice."
+
+3. Structured Inputs Sent to Model
+The model receives the following structured data object (example based on a real trace):
+
+{
+  "title": "BCI Campus | Welcome",
+  "description": "Leading higher education institute in Sri Lanka",
+  "headings": { "h1": 1, "h2": 12, "h3": 8 },
+  "wordCount": 1250,
+  "images": { "total": 24, "missingAltPercentage": 15 },
+  "links": { "internal": 45, "external": 10 },
+  "ctaCount": 5
+}
+
+4. Raw Model Output (Example)
+Below is a raw response trace from Gemini 1.5 Flash before being rendered by the frontend:
+
 {
   "insights": [
     {
       "category": "SEO Strategy",
-      "text": "The page has a strong foundation with 42 headings providing good structure, but 32% of the 34 images are missing alt text, which is a missed opportunity for image SEO."
+      "text": "The page structure is sound with a single H1, but 15% of images lack alt text, hindering accessibility and image SEO[cite: 22, 28]."
     },
     {
       "category": "User Experience",
-      "text": "With a high word count of 15,607 words and 31 CTAs, the page is very content-heavy. The high number of CTAs might cause decision fatigue for the user."
+      "text": "With only 5 CTAs across 1,250 words, the conversion path may be under-optimized relative to content depth[cite: 20, 32]."
     }
   ],
   "recommendations": [
     {
-      "title": "Add Missing Image Alt Text",
+      "title": "Optimize Image Accessibility",
       "impact": "High Impact",
-      "description": "Add descriptive alt text to the 11 images currently missing them to improve accessibility and image search rankings."
+      "description": "Add descriptive alt text to the 4 images currently missing tags to improve search visibility[cite: 41]."
     },
     {
-      "title": "Streamline CTAs",
+      "title": "Increase CTA Density",
       "impact": "Medium Impact",
-      "description": "Review the 31 CTAs to ensure there is a clear primary conversion path. Consolidate or remove secondary buttons to reduce cognitive load."
+      "description": "Strategically place 2-3 additional CTAs in high-engagement sections to improve the conversion rate[cite: 30]."
     }
   ]
 }
