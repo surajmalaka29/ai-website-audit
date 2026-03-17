@@ -26,7 +26,7 @@ export default function AuditDashboard() {
     setError('');
     
     try {
-      const response = await axios.post('http://localhost:3001/api/audit', { url });
+      const response = await axios.post('https://ai-website-audit-eu4l.onrender.com/api/audit', { url });
       setAuditData(response.data);
     } catch (err) {
       setError('Failed to fetch audit data. Please ensure your backend server is running on port 3001.');
